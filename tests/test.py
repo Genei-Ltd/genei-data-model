@@ -35,6 +35,5 @@ def test_sectioning(blank_resource):
     r = naive_sectioning(blank_resource)
     print('Sections after: ', len(r.sections))
     print('And not inplace: ', len(blank_resource.sections))
-    assert len(r.sections) == 4
-    assert len(r.other_blocks) == 7
+    assert len(r.sections) == 11
     assert len(blank_resource.sections) == 1

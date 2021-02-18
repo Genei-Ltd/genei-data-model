@@ -111,7 +111,7 @@ class Section:
 
 
 class Resource:
-    def __init__(self, filetype, source, sections=[], other_blocks=[], title=None, date_created=None, **kwargs):
+    def __init__(self, filetype, source, sections=[], title=None, date_created=None, **kwargs):
         t = kwargs.get('_type', 'Resource')
         assert t == 'Resource'
         self._type = t
@@ -137,12 +137,6 @@ class Resource:
             assert type(section) == Section
         self.sections = sections
 
-        # Validate other blocks
-        assert type(other_blocks) == list
-        for block in other_blocks:
-            assert type(block) == Block
-        self.other_blocks = other_blocks
-
         # Validate title
         if title is not None:
             assert type(title) == str
@@ -156,7 +150,6 @@ class Resource:
     @staticmethod
     def from_dict(d: dict) -> 'Resource':
         d['sections'] = [Section.from_dict(section) for section in d['sections']]
-        d['other_blocks'] = [Block.from_dict(block) for block in d.get('other_blocks', [])]
         return Resource(**d)
 
     @staticmethod
@@ -172,7 +165,6 @@ class Resource:
             'title': self.title,
             'date_created': self.date_created,
             'sections': [section.to_dict() for section in self.sections],
-            'other_blocks': [block.to_dict() for block in self.other_blocks]
         }
 
     def dumps(self) -> str:

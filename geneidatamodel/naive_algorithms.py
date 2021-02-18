@@ -24,18 +24,20 @@ def naive_sectioning(r:Resource) -> Resource:
     """
     r = deepcopy(r) # copy r - these algos are NOT in place
 
+    if len(r.sections) == 0:
+        return r
+        
     curr_section = Section()
-
     sections = [curr_section]
-    other_blocks = []
 
     for section in r.sections:
         for block in section.blocks:
         
-            # Figs and tables don't belong to the text sections
+            # Figs and tables get their own section
             if not block.label in ['title', 'text', 'list']:
-                print('Added to other_blocks')
-                other_blocks.append(block)
+                fig_section = Section()
+                fig_section.blocks.append(block)
+                sections.append(fig_section)
                 continue
                 
             if block.label == 'title':
@@ -58,6 +60,5 @@ def naive_sectioning(r:Resource) -> Resource:
             raise Exception(f"Did not find match for Block type: {block['type']}")
 
     r.sections = sections
-    r.other_blocks += other_blocks
     
     return r
