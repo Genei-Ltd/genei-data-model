@@ -49,6 +49,7 @@ class Block:
     def to_dict(self):
         return {
             '_type': 'Block',
+            'label': self.label,
             'coords': self.coords,
             'text': self.text,
         }
