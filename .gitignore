@@ -1,2 +1,5 @@
 .env/
-geneidatamodel/__pycache__/ tests/__pycache__/
+geneidatamodel/__pycache__/ 
+tests/__pycache__/
+.pytest_cache/
+.vscode/
