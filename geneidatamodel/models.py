@@ -17,25 +17,40 @@ import json
 FILETYPES = ['PDF']
 
 class Block:
-    def __init__(self, coords=[], text=None, label=None, **kwargs):
-        t = kwargs.get('_type', 'Block')
-        assert t == 'Block'
-        self._type = t
+    def __init__(self, coords: list, **kwargs) -> 'Block':
+        """
+        Object to represent an atomic segment of a resource, ie a line of text.
 
-        # Validate coords
+        Args:
+            coords: list
+                5-tuple of (page, x1, y1, x2, y2)
+            _type: str
+                Optional; Acts as a discriminator and validator. Always 'Block'.
+            text: str
+                Optional; Raw text string of the block.
+            label: str
+                Optional; Detectron label assigned to the block. One of
+                [text, title, list, figure, table]
+
+        Returns:
+            The initialized Block object. 
+        """
+
+        self.coords = coords
         assert type(coords) == list
         assert len(coords) == 5 # page, x1, y1, x2, y2
-        self.coords = coords
 
-        # Validate text
-        if text is not None:
-            assert type(text) == str
-        self.text = text
+        _type = kwargs.get('_type', 'Block')
+        assert _type == 'Block'
+        self._type = _type
 
-        # Validate label
-        if label is not None:
-            assert type(label) == str
-        self.label = label
+        self.text = kwargs.get('text', None)
+        if self.text is not None:
+            assert type(self.text) == str
+
+        self.label = kwargs.get('label', None)
+        if self.label is not None:
+            assert self.label in ['text', 'title', 'list', 'figure', 'table']
 
     @staticmethod
     def from_dict(d: dict) -> 'Block':
@@ -49,9 +64,9 @@ class Block:
     def to_dict(self):
         return {
             '_type': 'Block',
-            'label': self.label,
             'coords': self.coords,
             'text': self.text,
+            'label': self.label,
         }
 
     def dumps(self) -> str:
@@ -59,32 +74,53 @@ class Block:
     
 
 class Section:
-    def __init__(self, blocks=[], title=None, summary=None, **kwargs):
-        t = kwargs.get('_type', 'Section')
-        assert t == 'Section'
-        self._type = t
+    def __init__(self, _type=None, blocks=None, title=None, summary=None):
+        """
+        Object that groups Block objects into semantically similar regions.
+
+        Args:
+            _type: str
+                Optional; Acts as a discriminator and validator. Always 'Section'.
+            blocks: list
+                Optional; List of blocks the section contains. If None blocks
+                will be intialised to the empty list.
+            title: Block
+                Optional; A block to flag as the heading of the section.
+            summary: str
+                Optional; Raw text string of the block.
+
+        Returns:
+            The initialized Section object. 
+        """
+        self._type = _type
+        if self._type is None:
+            self._type = 'Section'
+        else:
+            assert self._type == 'Section'
 
         # Validate blocks
-        assert type(blocks) == list
-        for block in blocks:
-            assert type(block) == Block
         self.blocks = blocks
+        if self.blocks is None:
+            self.blocks = []
+        assert type(self.blocks) == list
+        for block in self.blocks:
+            assert type(block) == Block
 
         # Validate title
-        if title is not None:
-            assert type(title) == Block
         self.title = title
+        if self.title is not None:
+            assert type(self.title) == Block
 
         # Validate summary
-        if  summary is not None:
-            assert type(summary) == str
         self.summary = summary
+        if  self.summary is not None:
+            assert type(self.summary) == str
 
     @staticmethod
     def from_dict(d: dict) -> 'Section':
         # Convert title to Block object
-        title = d.get('title', '')
-        if (title is not None) and (len(title) > 0):
+        title = d.get('title')
+        if title is not None:
             d['title'] = Block.from_dict(title)
 
         # Convert blocks to Block objects 
@@ -111,41 +147,46 @@ class Section:
 
 
 class Resource:
-    def __init__(self, filetype, source, sections=[], title=None, date_created=None, **kwargs):
-        t = kwargs.get('_type', 'Resource')
-        assert t == 'Resource'
-        self._type = t
+    def __init__(self, _type=None, filetype=None, source=None, sections=None, title=None, date_created=None, **kwargs):
+        _type = kwargs.get('_type', 'Resource')
+        assert _type == 'Resource'
+        self._type = _type
 
         # Validate filetype
-        assert filetype in FILETYPES
         self.filetype = filetype
+        if self.filetype is not None:
+            assert filetype in FILETYPES
 
         # Validate source
-        assert type(source) == dict
-        assert (
-            (('bucket' in source) and ('key' in source))
-            or
-            ('url' in source)
-            or
-            ('data' in source)
-        ) # One of S3, Url or Payload source
         self.source = source
+        if self.source is not None:
+            assert type(source) == dict
+            assert (
+                (('bucket' in source) and ('key' in source))
+                or
+                ('url' in source)
+                or
+                ('data' in source)
+            ) # One of S3, Url or Payload source
 
         # Validate sections
-        assert type(sections) == list
-        for section in sections:
-            assert type(section) == Section
         self.sections = sections
+        if self.sections is None:
+            self.sections = []
+        else:
+            assert type(sections) == list
+            for section in sections:
+                assert type(section) == Section
 
         # Validate title
-        if title is not None:
-            assert type(title) == str
         self.title = title
+        if self.title is not None:
+            assert type(title) == str
 
         # Validate date_created
+        self.date_created = date_created
         if date_created is not None:
             assert type(date_created) == str
-        self.date_created = date_created
 
     @staticmethod
     def from_dict(d: dict) -> 'Resource':

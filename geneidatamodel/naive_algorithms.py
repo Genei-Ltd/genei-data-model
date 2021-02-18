@@ -24,41 +24,33 @@ def naive_sectioning(r:Resource) -> Resource:
     """
     r = deepcopy(r) # copy r - these algos are NOT in place
 
-    if len(r.sections) == 0:
-        return r
-        
-    curr_section = Section()
-    sections = [curr_section]
+    curr_section = None
+    sections = []
 
     for section in r.sections:
         for block in section.blocks:
         
             # Figs and tables get their own section
             if not block.label in ['title', 'text', 'list']:
-                fig_section = Section()
-                fig_section.blocks.append(block)
+                fig_section = Section(blocks=[block])
                 sections.append(fig_section)
-                continue
                 
-            if block.label == 'title':
-                has_blocks = len(curr_section.blocks) > 0
-                has_title = curr_section.title != None
-                if has_blocks or has_title:
-                    # Create a new section
-                    print('Created new section')
-                    curr_section = Section()
+            elif block.label == 'title':
+                if curr_section is not None:
                     sections.append(curr_section)
-                    
+                curr_section = Section()
                 curr_section.title = block
-                curr_section.blocks = []
-                continue
                 
-            if block.label in ['text', 'list']:
+            elif block.label in ['text', 'list']:
+                if curr_section is None:
+                    curr_section = Section()
                 curr_section.blocks.append(block)
-                continue
-                
-            raise Exception(f"Did not find match for Block type: {block['type']}")
+            
+            else: 
+                raise Exception(f"Did not find match for Block type: {block['type']}")
 
+    if curr_section is not None:
+        sections.append(curr_section)
     r.sections = sections
     
     return r
