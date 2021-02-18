@@ -58,6 +58,6 @@ def naive_sectioning(r:Resource) -> Resource:
             raise Exception(f"Did not find match for Block type: {block['type']}")
 
     r.sections = sections
-    r.other_blocks = other_blocks
+    r.other_blocks += other_blocks
     
     return r
