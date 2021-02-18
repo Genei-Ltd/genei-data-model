@@ -1,12 +1,19 @@
 from geneidatamodel import merge_resources
 from geneidatamodel import naive_sectioning
 from geneidatamodel import naive_ordering
+from geneidatamodel import Resource
 
 from pprint import PrettyPrinter
 pp = PrettyPrinter()
 
 def test_basic(blank_resource):
     assert blank_resource
+
+def test_io(blank_resource):
+    r = blank_resource
+    s = r.dumps()
+    r = Resource.loads(s)
+    assert r.to_dict() == blank_resource.to_dict()
 
 def test_merge(blank_resource):
     rs = [blank_resource]*3

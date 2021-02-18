@@ -17,8 +17,10 @@ import json
 FILETYPES = ['PDF']
 
 class Block:
-    def __init__(self, coords=[], text=None, label=None):
-        self._type = 'Block'
+    def __init__(self, coords=[], text=None, label=None, **kwargs):
+        t = kwargs.get('_type', 'Block')
+        assert t == 'Block'
+        self._type = t
 
         # Validate coords
         assert type(coords) == list
@@ -56,8 +58,10 @@ class Block:
     
 
 class Section:
-    def __init__(self, blocks=[], title=None, summary=None):
-        self._type = 'Section'
+    def __init__(self, blocks=[], title=None, summary=None, **kwargs):
+        t = kwargs.get('_type', 'Section')
+        assert t == 'Section'
+        self._type = t
 
         # Validate blocks
         assert type(blocks) == list
@@ -106,8 +110,10 @@ class Section:
 
 
 class Resource:
-    def __init__(self, filetype, source, sections=[], other_blocks=[], title=None, date_created=None):
-        self._type = 'Resource'
+    def __init__(self, filetype, source, sections=[], other_blocks=[], title=None, date_created=None, **kwargs):
+        t = kwargs.get('_type', 'Resource')
+        assert t == 'Resource'
+        self._type = t
 
         # Validate filetype
         assert filetype in FILETYPES
