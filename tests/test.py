@@ -37,3 +37,6 @@ def test_sectioning(blank_resource):
     print('And not inplace: ', len(blank_resource.sections))
     assert len(r.sections) == 11
     assert len(blank_resource.sections) == 1
+
+def test_constrution():
+    r = Resource()

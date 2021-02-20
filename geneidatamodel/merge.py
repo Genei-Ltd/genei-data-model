@@ -25,7 +25,7 @@ def merge_resources(resources:List[Resource], allow_overwrite:bool =True) -> Res
         for section in resource.sections:
             return_resource.sections.append(section)
         for k,v in resource.__dict__.items():
-            if not return_resource.__dict__.get(k, False):
+            if return_resource.__dict__.get(k, None) == None:
                 setattr(return_resource, k, v)
 
     return return_resource
